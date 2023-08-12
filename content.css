@@ -1,0 +1,15 @@
+#ext-circle-add-remove-button {
+  border-color: rgb(0, 186, 124);
+}
+
+#ext-circle-add-remove-button:hover {
+  background-color: rgba(0, 186, 124, 0.2);
+}
+
+#ext-circle-add-remove-button:focus-visible {
+  outline: 2px solid rgb(0, 186, 124);
+}
+
+#ext-circle-add-remove-button svg {
+  color: rgb(0, 186, 124);
+}
