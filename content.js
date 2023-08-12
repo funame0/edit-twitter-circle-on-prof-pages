@@ -44,7 +44,7 @@ const main = () => {
     button.className = userActions.className;
     button.firstElementChild.className =
       userActions.firstElementChild.className;
-    userActions?.after(button);
+    userActions.after(button);
   };
 
   let username;
