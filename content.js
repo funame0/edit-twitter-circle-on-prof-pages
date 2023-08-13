@@ -1,8 +1,5 @@
 const BUTTON_ID = "ext-circle-add-remove-button";
-const BEARER_TOKEN =
-  "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs=1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
 
-// ↓ DOM
 const waitForElement = selector =>
   new Promise(resolve => {
     const element = document.querySelector(selector);
@@ -46,77 +43,60 @@ const addButton = async button => {
   button.firstElementChild.className = userActions.firstElementChild.className;
   userActions.after(button);
 };
-// ↑ DOM
-// ↓ API calling
+
 const getCsrfToken = () => document.cookie.match(/(?<=ct0=)[^;]+/)?.[0];
 
+const callAPI = async (url, options = {}) => {
+  const bearerToken =
+    "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs=1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
+
+  const ct0 = getCsrfToken();
+  if (!ct0) return;
+
+  const headers = {
+    authorization: bearerToken,
+    "x-csrf-token": ct0,
+    "x-twitter-active-user": "yes",
+    "x-twitter-auth-type": "OAuth2Session",
+  };
+
+  const response = await fetch(url, Object.assign({ headers }, options));
+
+  return response.json();
+};
+
 const getTFLists = async () => {
-  const ct0 = getCsrfToken();
-  if (ct0) {
-    const endpoint =
-      "https://twitter.com/i/api/graphql/QjN8ZdavFDqxUjNn3r9cig/AuthenticatedUserTFLists";
+  const endpoint =
+    "https://twitter.com/i/api/graphql/QjN8ZdavFDqxUjNn3r9cig/AuthenticatedUserTFLists";
 
-    const headers = {
-      authorization: BEARER_TOKEN,
-      "x-csrf-token": ct0,
-      "x-twitter-active-user": "yes",
-      "x-twitter-auth-type": "OAuth2Session",
-    };
-
-    const response = await fetch(endpoint, { headers });
-    const responseJson = await response.json();
-    const TFLists =
-      responseJson?.data?.authenticated_user_trusted_friends_lists;
-    return TFLists;
-  }
+  const responseJson = await callAPI(endpoint);
+  const TFLists = responseJson?.data?.authenticated_user_trusted_friends_lists;
+  return TFLists;
 };
 
-const addRemoveUserToTFList = async (addOrRemove, userId, trustedFriendsId) => {
-  const ct0 = getCsrfToken();
-  if (ct0) {
-    let queryId;
-    let endpointName = TrustedFriendsAddRemoveButton;
-    if (addOrRemove === "add") {
-      queryId = "kz2e24ykUcLEssPne7Df-Q";
-      endpointName += "AddMutation";
-    } else if (addOrRemove === "remove") {
-      queryId = "Zv06okw7DQo4_O7nWyV-9g";
-      endpointName += "RemoveMutation";
-    } else {
-      throw TypeError(
-        addOrRemove +
-          " is not a valid parameter. Valid values are 'add' or 'remove'."
-      );
-    }
+const [addUserToTFList, removeUserFromTFList] = [
+  ["kz2e24ykUcLEssPne7Df-Q", "TrustedFriendsAddRemoveButtonAddMutation"],
+  ["Zv06okw7DQo4_O7nWyV-9g", "TrustedFriendsAddRemoveButtonRemoveMutation"],
+].map(([queryId, endpoint]) => (userId, trustedFriendsId) => {
+  const data = {
+    features: {
+      responsive_web_graphql_timeline_navigation_enabled: true,
+    },
+    queryId,
+    variables: {
+      trustedFriendsId,
+      userId,
+    },
+  };
 
-    const headers = {
-      authorization: BEARER_TOKEN,
-      "x-csrf-token": ct0,
-      "x-twitter-active-user": "yes",
-      "x-twitter-auth-type": "OAuth2Session",
-    };
+  const url = `https://twitter.com/i/api/graphql/${queryId}/${endpoint}`;
 
-    const data = {
-      features: {
-        responsive_web_graphql_timeline_navigation_enabled: true,
-      },
-      queryId,
-      variables: {
-        trustedFriendsId,
-        userId,
-      },
-    };
-
-    return await (
-      await fetch(endpoint, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(data),
-      })
-    ).json();
-  }
-};
-// ↑ API calling
+  return callAPI(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  });
+});
 
 const main = () => {
   const button = createButton();
