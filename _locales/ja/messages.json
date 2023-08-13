@@ -1,0 +1,8 @@
+{
+  "ext_name": {
+    "message": "Twitter Circle をプロフィールページで編集"
+  },
+  "ext_desc": {
+    "message": "プロフィールページに Twitter Circle を編集するボタンを追加します。"
+  }
+}
