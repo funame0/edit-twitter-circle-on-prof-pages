@@ -25,8 +25,9 @@ const main = () => {
     const button = document.createElement("div");
     button.id = BUTTON_ID;
     button.tabIndex = 0;
-    button.setAttribute("role", "button");
+    button.title = "Circle";
     button.setAttribute("aria-label", "Circle");
+    button.setAttribute("role", "button");
 
     const child = document.createElement("div");
     child.innerHTML =
