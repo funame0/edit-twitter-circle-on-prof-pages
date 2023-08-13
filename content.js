@@ -18,9 +18,11 @@ const waitForElement = selector =>
     observer.observe(document, { subtree: true, childList: true });
   });
 
-const createButton = () => {
-  document.getElementById(BUTTON_ID)?.remove(); // Remove if already exists
+const removeButton = () => {
+  document.getElementById(BUTTON_ID)?.remove();
+};
 
+const createButton = () => {
   const button = document.createElement("div");
   button.id = BUTTON_ID;
   button.tabIndex = 0;
@@ -99,6 +101,7 @@ const [addUserToTFList, removeUserFromTFList] = [
 });
 
 const main = () => {
+  removeButton();
   const button = createButton();
 
   let username;
